@@ -1,0 +1,516 @@
+---
+title: "Data 305 Assignment 1 Solutions"
+output: html_notebook
+---
+
+## Review of Foundations of Probability Theory and Random Variables
+
+
+**Question 1:(6 mark)** On a Sunday night, there are four people on a bus. The bus has five stops left before it ends its route. Suppose each person will get off the bus at one of the stops, and will do so randomly 
+
+
+**1a:(2 mark)**	How many different ways could the people get off the bus?
+
+Solution:
+$$
+\begin{aligned}
+n(s)= 5*5*5*5=5^4 =625 ways
+\end{aligned}
+$$
+
+**1b:(2 mark)**	What is the probability that all four people get off the bus on the first stop?
+
+Solution:
+$$
+\begin{aligned}
+P(A)= \frac{n(A)}{n(S)}=\frac {1*1*1*1}{5^4}=\frac{1}{625}
+\end{aligned}
+$$
+
+
+**1c:(2 mark)**	What is the probability that exactly three of the four people get off the bus on the same stop?
+
+Solution:
+$$
+\begin{aligned}
+P(C)= \frac{n(C)}{n(S)}=\frac{\binom{4}{3}*5*1*1*4}{5^4}=\frac{80}{625}
+\end{aligned}
+$$
+
+**Additional Question**	What is the probability that all four people get off the bus on the same stop?
+
+Solution:
+$$
+\begin{aligned}
+P(B)= \frac{n(B)}{n(S)}=\frac{\binom{5}{1}*1*1*1*1}{5^4}=\frac{5}{625}
+\end{aligned}
+$$
+
+
+**Question 2:(8 mark)** A computer system uses passwords of five characters, each character being one of the 26 letters (a-z) or 10 integers (0-9). The first character has to be a letter. Suppose a hacker selects a password at random. Determine the probabilities that the password 
+
+ 
+**2a:(2 mark)** begins with a vowel (a, e, i, o, u).
+
+Solution:
+
+$$
+\begin{aligned}
+P(A)= \frac{n(A)}{n(S)}=\frac{5*36*36*36*36}{26*36*36*36*36}=\frac{5}{26}
+\end{aligned}
+$$
+
+**2b:(2 mark)** ends with an odd number (1, 3, 5, 7, 9).
+
+Solution:
+
+$$
+\begin{aligned}
+P(B)= \frac{n(B)}{n(S)}=\frac{26*36*36*36*5}{26*36*36*36*36}=\frac{5}{36}
+\end{aligned}
+$$
+
+
+**2c:(2 mark)** begins with a vowel (a, e, i, o, u) and ends with an odd number (1, 3, 5, 7, 9)
+
+Solution:
+
+$$
+\begin{aligned}
+P(A \cap B)= \frac{n(A \cap B)}{n(S)}=\frac{5*36*36*36*5}{26*36*36*36*36}=\frac{5*5}{26*36}=\frac{25}{936}
+\end{aligned}
+$$
+
+
+**2d:(2 mark)** begins with a vowel (a, e, i, o, u) or ends with an odd number (1, 3, 5, 7, 9)
+
+Solution:
+
+$$
+\begin{aligned}
+P(A U B)= P(A)+P(B)-P(A \cap B) = \frac{5}{26} +\frac{5}{36} -\frac{25}{936} = 0.3044872
+\end{aligned}
+$$
+
+
+
+**Question 3:(3 mark)** Two events A and B are investigated. P(A) = 0.35, P(B) = 0.72, and the percent chance that at least one of event A or B occur is 90 %. What is the probability that **only one of the events** happens? **Note!** Must show your work clearly to receive a full mark.
+
+Solution:
+
+$$
+\begin{aligned}
+P(AUB)&=0.90, P(A)=0.35, and P(B)=0.72 \,\,\,Find\,\, P(A \cap B^c)+ P(B \cap A^c)=?\\
+P(A \cap B) & = P(A)+P(B)-P(AUB)= 0.35+0.72-0.90=0.17\\
+P(A \cap B^c) &=P(A)-P(A \cap B)=0.35-0.17=0.18\\
+P(B \cap A^c) &=P(B)-P(A \cap B)=0.72-0.17=0.55\\
+&Hence, P(A \cap B^c)+ P(B \cap A^c)=0.18+0.55=0.73
+\end{aligned}
+$$
+
+**Question 4:(15 mark)** A four sided fair die labeled 1,2,3,4 is tossed. It is read by looking at the number that lands up or at the top of the die. You are to roll this die 4 times and observe the sum of the four numbers appearing at the top of each die. Write a simulation algorithm in R Studio (Use 5000 simulations) to compute the probability of
+
+**4a:(5mark)** the sum of tossing is between 7 and 12 inclusive.
+
+Solution:
+
+```{r}
+nsims = 5000
+outcome = numeric(nsims)
+counter = 0
+for(i in 1:nsims)
+{
+  outcome[i] = sum(sample(c(1,2,3,4), 4, replace = TRUE)) #sum of the 4 tosses
+  if ((outcome[i] >= 7) & (outcome[i] <= 12)) counter = counter + 1
+}
+hist(outcome, xlab="Sum of the Four Tosses of a Four Sided Die", col="blue", main="Distribution of the Sum of Four Tosses")
+prob=counter/nsims
+prob
+```
+**4b:(5 mark)** the sum of tossing is more than 13.
+
+Solution:
+
+```{r}
+nsims = 5000
+outcome = numeric(nsims)
+counter = 0
+for(i in 1:nsims)
+{
+  outcome[i] = sum(sample(c(1,2,3,4), 4, replace = TRUE)) #sum of the 4 tosses
+  if ((outcome[i] > 13)) counter = counter + 1
+}
+hist(outcome, xlab="Sum of the Four Tosses of a Four Sided Die", col="blue", main="Distribution of the Sum of Four Tosses")
+prob=counter/nsims
+prob
+```
+
+
+**4c:(5 mark)** tossing at least one of number 3 from 4 tosses.
+
+Solution:
+
+```{r}
+nsims = 5000
+minimumonefour = numeric(nsims)
+counter = 0
+
+for(i in 1:nsims)
+{  outcome = sample(c(1,2,3,4), 4, replace=TRUE)  #outcome of the 4 tosses
+   trialcount = 0
+   for(j in 1:4)
+   { if (outcome[j] == 3) trialcount =1
+   }
+   
+   
+if (trialcount > 0) counter =  counter + 1  #counts at how many times observed >= 4
+}
+prob= counter/nsims
+prob
+```
+
+
+**Question 5:(6 mark)** According to Our World in Data website, 70% of Canadian is fully vaccinated. If a person is fully vaccinated, the chance of getting COVID-19 is 20%. Suppose 40% of Canadian gets infected with COVID-19. Use this information to answer the following questions.
+
+**5a:(3mark)** Complete the following probability table. 
+
+
+
+$$
+\begin{array}{lccr}
+\text{Event}         &    Vaccinated      &   NotVaccinated    & \text{Row Totals} \\
+Covid     &  ... &  ... & ... \\
+NoCovid  &  ...   &  ... & ...  \\
+\text{Column Totals} &  ... &  ... & ...
+\end{array}
+$$
+
+Solution:
+
+$$
+\begin{array}{lccr}
+\text{Event}         &    Vaccinated      &   NotVaccinated    & \text{Row Totals} \\
+Covid     &  0.14 &  0.26 & 0.40 \\
+NoCovid  &  0.56  &  0.04 & 0.60  \\
+\text{Column Totals} &  0.70 &  0.30 & 1.00
+\end{array}
+$$
+
+
+**5b:(1 mark)** Consider a randomly selected Canadian, What is the probability that this person is vaccinated and did not get infected with COVID-19? 
+
+Solution:
+
+$$
+\begin{aligned}
+P(Vaccinated \cap Covid_c)=0.56
+\end{aligned}
+$$
+
+**5c:(2 mark)** Consider a randomly selected Canadian, If this person gets COVID-19, What is the probability that this person is not vaccinated?
+
+Solution:
+
+$$
+\begin{aligned}
+P(Vaccinated_c|Covid)=\frac{P(Vaccinated_c \cap Covid)}{P(Covid)}=\frac{0.26}{0.40}=0.65
+\end{aligned}
+$$
+
+**Note!** Must show your work clearly to receive a full mark.
+
+
+
+
+**Question 6:(8 mark)** A typical deck of cards has 4 suits(club,spade,diamond and heart) and the following 13 denominations: Ace, 2 thru 10, Jack, Queen, and King). A single card has two characteristics: a suit and denomination. For example, [King of diamond ] or [4 of club] etc.
+
+Imagine a typical deck of cards with an additional 2 suit(s). Each new suit still has the normal 13 denominations as the original suits. Your new expanded deck then has 78 total cards and a total of 6 suits.
+
+If 5 cards are randomly selected without replacement from your deck of 78 card deck. Find the probabilities of 
+
+From the probability experiment, the sample space n(S)= $\binom{78}{5}$ 
+
+**6a:(2 mark)**  three of a kind, meaning three cards with the same denomination and two singular cards who's denomination don't match any other cards in the hand.
+
+Solution:
+
+$$
+\begin{aligned}
+&Pattern: AAABC\\
+&P(AAABC)=\frac{\binom{13}{1}\binom{6}{3}\binom{12}{2}\binom{6}{1}\binom{6}{1}}{\binom{78}{5}}
+\end{aligned}
+$$
+
+
+**6b:(2 mark)**  a pair,meaning two cards with the same denomination and three singular cards who's denomination don't match any other cards in the hand.
+
+Solution:
+
+$$
+\begin{aligned}
+&Pattern: AABCD\\
+&P(AABCD)=\frac{\binom{13}{1}\binom{6}{2}\binom{12}{3}\binom{6}{1}\binom{6}{1}\binom{6}{1}}{\binom{78}{5}}
+\end{aligned}
+$$
+
+**6c:(2 mark)**  two pairs,meaning two cards with the same denomination in each set (two sets in total) and one singular cards who's denomination don't match any other cards in the hand.
+
+Solution:
+
+$$
+\begin{aligned}
+&Pattern: AABBC\\
+&P(AABBC)=\frac{\binom{13}{2}\binom{6}{2}\binom{6}{2}\binom{11}{1}\binom{6}{1}}{\binom{78}{5}}
+\end{aligned}
+$$
+**6d:(2 mark)** 3 Kings and 2 Diamonds.
+
+Solution:
+
+$$
+\begin{aligned}
+&\text{There are 2 possible cases for this random experment:}\\
+&\text{Case 1: no king dimond card in the hand}\\
+&P(3Kings \cap 2 Diamonds)=\frac{\binom{5}{3}\binom{12}{2}}{\binom{78}{5}}\\
+&\text{Case 2: Ther is a king dimond card in the hand}\\
+&P(3Kings \cap 2 Diamonds)=\frac{\binom{1}{1}\binom{5}{2}\binom{12}{1}\binom{60}{1}}{\binom{78}{5}}\\
+&Therefore, P(3Kings \cap 2 Diamonds)=case1+case2=0.0003723162
+\end{aligned}
+$$
+```{r}
+ns=choose(78,5)
+case1=choose(5,3)*choose(12,2)
+case2=choose(1,1)*choose(5,2)*choose(12,1)*choose(60,1)
+prob=(case1+case2)/ns
+prob
+```
+
+**Question 7:(5 mark)** In a certain company, 50% of documents are written in Word, 30% in Latex, and 20% in Html. From past experience it is known that 
+
+If the documents are written in World, 40% of the Word documents exceed 10 pages; 
+
+If the documents are written in Latex, 20% of the Latex documents exceed 10 pages; 
+
+If the document are written in Html, 20% of the Html documents exceed 10 pages.
+
+**7a:(3 mark)**Compute the overall proportion of documents containing more than 10 pages, with RStudio? 
+
+Solution:
+
+Assuming A be the event that a document selected at random is more than 10 pages long. The Law of Total Probaility can be applied for this probability experiment.
+
+$$
+\begin{aligned}
+&P(A) = \sum_{i=1}^3 P(A|B_i)P(B_i)\\
+&=P(Word)P(A|Word) + P(Latex)P(A|Latex) + P(Html)P(A|Html) \\
+&= (0.5*0.4) + (0.3*0.2) + (0.2*0.2) = 0.3
+\end{aligned}
+$$
+```{r}
+prior=c(0.5,0.3,0.2)
+cond=c(0.4,0.2,0.2)
+eachterm=prior*cond
+sum(eachterm)
+```
+
+**7b:(2 mark)** If a document that was chosen at random was found to exceed 10 pages, what is the probability that it has been written in Latex? 
+
+Solution:
+
+$$
+\begin{aligned}
+P(Latex|A) &=\frac{P(Latex \cap A)}{P(A)} \\
+&=\frac{P(Latex)P(A|Latex)}{P(A)} \\
+&= \frac{0.3*0.2}{0.3} = 0.2
+\end{aligned}
+$$
+**Question 8:(3 mark)** A Powerball-like lottery is played each week. To play this lottery, a participant must select 4 numbers from the digits 1 through 9 and try to match the 4 numbers selected by the lottery operator. What is the probability that at most 3 numbers selected by the participant will match the Powerball numbers selected by the operator, with R Studio?
+
+Solution:
+
+n(s)= \binom{9}{4}
+
+$$
+\begin{aligned}
+&n(s)= \binom{9}{4}\\
+&P(at\,\,most\,\,\,3\,\,matching\,\,numbers)=1-P(4\,\,matching\,\,numbers)\\
+&= 1-\frac{\binom{4}{4}\binom{5}{0}}{\binom{9}{4}}= 1- \frac{1}{\binom{9}{4}}=0.992063
+\end{aligned}
+$$
+```{r}
+patmost3v1=1-(1/choose(9,4))
+patmost3v1
+x=0:3
+patmost3v2=sum((choose(4,x)*choose(5,4-x))/choose(9,4))
+patmost3v2
+```
+
+**Question 9:(12 mark)** Let X be a random variable which the probability distribution of X is 
+
+$P(X=x)= \binom{20}{x} *(0.25)^x*(0.75)^{20-x} ;x=0,1,2,...,20$
+
+**9a:(3 mark)** Contruct the probability distribution of X in RStudio with P(X=x) on the Y-axis and the values of X on the X-axis. 
+
+Solution:
+
+```{r}
+x = 0:20
+probx = function(x){choose(20,x)*(0.25^{x})*(0.75)^{20-x}}
+plot(x, probx(x), xlab="Values of X", ylab = "P(X = x)", main="Distribution of X", type="h", col="blue")
+```
+**9b:(3 mark)** What is P(X<10)?
+
+Solution:
+
+```{r}
+x = 0:20
+probx = function(x){choose(20,x)*(0.25^{x})*(0.75)^{20-x}}
+sum(probx(0:9))
+```
+**9c:(3 mark)** What is P(X>4)?
+
+Solution:
+
+```{r eval=FALSE}
+x = 0:20
+probx = function(x){choose(20,x)*(0.25^{x})*(0.75)^{20-x}}
+1-sum(probx(0:4))
+sum(probx(5:20))
+```
+
+**9d:(3 mark)** Compute the expected value E[X] and SD(X), with R Studio.
+
+Solution:
+
+```{r eval=FALSE}
+x=0:20
+probx = function(x){choose(20,x)*(0.25^{x})*(0.75)^{20-x}}
+ev=sum(x*probx(x))
+ev
+m2=sum(x^2*probx(x))
+m2
+standarddeviation = sqrt(m2 - ev^2)
+standarddeviation
+```
+
+
+**Question 10:(8 mark)** The following dice game costs $10 to play. If you roll 1, or 2 you lose your money. If you roll 3 or 4, you get your money back. If you roll a 5, you
+win $6 and If you roll a 6, you win 18 dollars.
+
+**10a:(3 mark)** Construct the probability distribution of the profit of the dice game. 
+
+Solution:
+
+```{r eval=FALSE}
+x = c(-10,0,-4,8)
+probx = c(2/6,2/6,1/6,1/6)
+plot(x, probx, xlab="Values of X", ylab = "P(X = x)", main="Distribution of X", type="h", col="blue")
+```
+**10b:(2 mark)** One average, how much one can expect to lose or gain from this game? (Use R Studio)
+
+Solution:
+
+```{r eval=FALSE}
+x = c(-10,0,-4,8)
+probx = c(2/6,2/6,1/6,1/6)
+ev=sum(x*probx)
+ev
+```
+**10c:(3 mark)** How much does the dice game should cost to make it a fair game (neither side has an advantage)?
+Solution:
+
+$$
+\begin{aligned}
+\mbox{Let k be the cost of playing the dice game.}\\
+E(Profit)&= 0 \\
+&= \sum Profit \cdot P(X=x)\\
+&=(0-k)(2/6)+(k-k)(2/6)+(6-k)(1/6)+(18-k)(1/6)\\
+0&=4-\frac{4k}{6}\\
+&k=6
+\end{aligned}
+$$
+Therefore, It would be called a fair game if the cost of playing this game was $6.
+
+For those who interpret "If you roll 3 or 4, you get your money back" which is $10 following the original ticket price, this is acceptable
+
+$$
+\begin{aligned}
+\mbox{Let k be the cost of playing the dice game.}\\
+E(Profit)&= 0 \\
+&= \sum Profit \cdot P(X=x)\\
+&=(0-k)(2/6)+(10-k)(2/6)+(6-k)(1/6)+(18-k)(1/6)\\
+0&=\frac{44}{6}-\frac{6k}{6}\\
+&k=\frac{44}{6}=7.33
+\end{aligned}
+$$
+Therefore, It would be called a fair game if the cost of playing this game was $7.33.
+
+--------------------------------------------
+
+**Question 11:(4 mark)** The average salary of new employees in a computer firm is 127,500 dollars with a variance of 40,000 dollars.  After negotiations with the trade union, it was agreed that employees would get a rise of 1000 dollars in addition to 10 percent increase on their basic salaries. 
+
+What is the new average salary and the new stangard variation? 
+
+Solution:
+
+$$
+\begin{aligned}
+\mbox{Let X be the salary and Y be the new salary.}\\
+&Y=1000+1.1X\\
+E(Y)&= E(1000+1.1X)=E(1000)+1.1E(X) \\
+&= E(1000+1.1X)=1000+1.1(127500)\\
+&=1000+140250=141250\\
+V(Y)&= V(1000+1.1X)=0+(1.1)^2V(X)\\
+&=48400\\
+SD(Y)&=220
+\end{aligned}
+$$
+
+**Question 12:(8 mark)**A random variable X has E(X) = 50 and Var(X) = 16. Compute
+
+**12a:(2 mark)**  E(4X) and SD(4X).
+
+Solution:
+$$
+\begin{aligned}
+&E(4X)=4E(X)=4(50)=200\\
+&SD(X)=\sqrt{Var(4X)}=\sqrt{16Var(X)}=4*\sqrt{16}=16
+\end{aligned}
+$$
+
+
+**12b:(2 mark)**  E(X + 10) and SD(X + 10).
+
+Solution:
+$$
+\begin{aligned}
+&E(X+10)=E(X)+10=50+10=60.\\
+&SD(X)=\sqrt{Var(X+10)}=\sqrt{Var(X)}=\sqrt{16}=4
+\end{aligned}
+$$
+
+**12c:(2 mark)**  E(X −4) and SD(X −4).
+
+Solution:
+$$
+\begin{aligned}
+&E(X−4)=E(X)−4=50−4=46.\\
+&SD(X)=\sqrt{Var(X-4)}=\sqrt{Var(X)}=\sqrt{16}=4
+\end{aligned}
+$$
+
+**12d:(2 mark)**  $E(10X^2)$
+
+Solution:
+$$
+\begin{aligned}
+&E(10X^2)=10E(X^2)=10(Var(X)+E(X)^2))=10(16+50^2)=10(2516)=25160.
+\end{aligned}
+$$
+
+**Reference**
+
+-Robert P. Dobrow, Probaility with Applications and R, Wiley
+
+-Jane M. Horgan, Probability with R: An introduction with Computer Science Applications ,2009, Wiley.
+

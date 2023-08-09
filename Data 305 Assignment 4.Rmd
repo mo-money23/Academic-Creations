@@ -1,0 +1,939 @@
+---
+title: "DATA 305 - Assignment 4"
+author: "Muhammad Maqsood"
+output: html_notebook
+---
+
+## Central Limit Theorem for the sample statistics, Maximum Likelihood Estimation,Unbiased Estimator, Bootstrap Percentile and Conventinal Confidence Interval Estimation for one population Parameters, Bootstrapping to Create Confidence Intervals for the Difference Between Two Population Parameters, and Introduction to Hypothesis Testing
+
+**Question 1: (10 marks)** In a certain beverage manufacturers factory, an automated soft-drink filling machine is to fill 2-liter bottles with product, the amount of soft-drink slightly varying from one 2-liter bottle to the next in according with a Normal probability model with a mean of $μ = 1.89$ liters and a standard deviation of $σ = 0.04$ liters.
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+**1a:(2 marks)** You are to randomly pick n = 50 2-litre bottles and measure the amount of soft-drink in each. Compute the probability that **the mean amount of soft-drin*k** in these 50 2-liter bottles is more than 1.90 liters.
+```{r}
+# Using CLT we can assume that since the population follows a normal distribution the sample will be exactly normal
+mu1a = 1.89
+sd1a = 0.04
+n1a = 50
+
+# Find Z
+z1a = (1.90 - mu1a)/(sd1a/sqrt(n1a))
+
+# Find P(X > 1.90)
+1 - pnorm(z1a) 
+# or
+1 - pnorm(1.90, 1.89, 0.04/sqrt(50))
+```
+
+<BR>
+<BR>
+
+**1b:(2 marks)** Consider the probability distribution you used answer part (a). Find both the 2.5th percentile and the 97.5th percentile of $\overline{X}$, or $\overline{X}_{2.5}$ and $\overline{X}_{97.5}$.
+```{r}
+qnorm(0.025, 1.89, 0.04/sqrt(50))
+qnorm(0.975, 1.89, 0.04/sqrt(50))
+```
+
+<BR>
+<BR>
+  
+**1c:(3 marks)** Compute the probability that the observed value of the sample mean $\overline{X}$ will be “off” $μ = 1.89$ by at most 0.02 litres. Hint: $P(|\overline{X} - \mu|) \leq 0.02=?$
+```{r}
+# Standardize Xbar with the absolute value of Xbar - MUx = 0.02
+z1c = 0.02/(0.04/sqrt(50))
+z1c
+pnorm(z1c)
+```
+
+<BR>
+<BR>
+
+**1d:(3 marks)** Suppose you were to sample n 2-litre bottles according to the criteria: Sample n-bottles such that the probability of the sample mean being off the population mean is at most 0.01 with probability of 0.95.
+How many bottles would you need to choose/select?  
+```{r}
+# find n using the z-score formula ; n = (z*σ/(Xbar-Mu)^2)
+z1d = pnorm(1.96) - pnorm(-1.96)
+z1d
+n1d = ceiling((z1d*0.04/0.01)^2)
+n1d
+```
+
+<BR>
+<BR>
+
+Hint: Let $P(|\overline{X} - \mu|) \leq 0.01=0.95$ and $0.95=P(-1.96\leq Z\leq1.96)$
+  
+-----------------------------------------------------------
+
+
+**Question 2: (13 marks)** A somewhat recent poll^1^ found that 4 in 5 Canadians, or 80%, support “Canada’s Foreign Minister’s decision to call for the release of human-rights activists detained in Saudi Arabia”
+
+**2a:(2 marks)** State the mean and standard deviation of the distribution of $\widehat{p}$, based on a random sample of n = 500 Canadians, presuming $p = 0.80$.
+```{r}
+mu2a = 0.80 # Mean of Phat is p
+mu2a
+sd2a = sqrt((0.8*(1-0.8))/500) # SD of Phat = sqrt((p*(1-p))/n)
+sd2a
+```
+
+<BR>
+<BR>
+  
+**2b:(2 marks)** A sample of n = 500 Canadians revealed that 374, or $\widehat{p}=\frac{374}{500}$ = 0.748, supported the Foreign Minister’s decision to call for Saudi Arabia to release human-rights activists detained. How likely is this outcome? Compute the probability of a sample of n = 500 producing a sample proportion that is less than or equal to what was observed.
+```{r}
+# P(pHat <= 0.748)
+pnorm(0.748, mu2a, sd2a)
+```
+
+<BR>
+<BR>
+
+**2c:(6 marks)** Generate a distribution of the sample proportion, $\widehat{p}$, when sampling n = 500 Canadians to determine national support for the Foreign Minister’s decision to call for the release of human-rights activists detained in Saudi Arabia. Run this code incorporating the few modifications necessary to determine the proportion of your sample proportions $\widehat{p_i}$ that are less than or equal to 0.748. Provide this proportion.
+```{r}
+nsims = 2000
+n = 500
+sampleprop = numeric(nsims)
+for(i in 1:nsims)
+{   outcome = rbinom(1, n, 0.80)
+    sampleprop[i] = (outcome/n)
+    if (sampleprop[i] <=0.78) outcome[i]=1 else outcome[i]=0
+}
+dfq2c = data.frame(sampleprop)
+```
+
+<BR>
+<BR>
+Hint: To generate a distribution of the sample proportion, check Lab 4 Exercise 2 
+<BR>
+<BR>
+Hint: To determine the proportion of your sample proportions $\widehat{p_i}$ that are less than or equal to 0.748, use if (sampleprop[i] <=0.78) propobserved[i]=1 else propobserved[i]=0
+<BR>
+<BR>
+
+
+**2d:(3 marks)** From the distribution generated in part (2c), provide both the first and 99th percentiles, $\widehat{p_1}$ and $\widehat{p_{99}}$
+```{r}
+library(mosaic)
+favstats(~ sampleprop, data = dfq2c)
+mean(sampleprop, data = dfq2c) # verifying 
+sd(sampleprop, data = dfq2c) # verifying
+qnorm(0.01, 0.7999397, 0.01803133) # pHat1
+qnorm(0.99, 0.7999397, 0.01803133) # pHat99
+```
+
+
+Note: Ensure that you use the command **data.frame()** to create a dataset of the sample proportion in part 2c.
+
+^1^https://www.ipsos.com/en-ca/news-polls/canadians-on-saudi-arabia
+
+-----------------------------------------------------------
+
+
+**Question 3: (8 marks)** The average number of typos on the first draft of R for DataScience textbook is 4 typos per page. The author randonly selected 493 pages from this draft. 
+
+Let X represent the number of typos on a given page and $\bar{x}$ be the average number of typos per page for this sample.
+
+**3a:(2 marks)** Describe the distribution of X and $\bar{X}$
+```{r}
+# The distribution of X is a Poisson Distribution with an unknown skew, this means that the distribution of X-bar is approximately normal with a mean of 4 and a standard deviation of 4/sqrt(493)
+```
+
+<BR>
+<BR>
+
+**3b:(2 marks)** Use R, compute the probability that there are no typos on a given page.
+```{r}
+dpois(0, 4)
+```
+
+<BR>
+<BR>
+
+**3c:(2 marks)**  Use R, compute the probability that **the average number of typos per page of this particular sample** is between 2 to 4 typos (inclusive).
+```{r}
+# Use pnorm as X-bar is approx. normal
+pnorm(4, 4, sqrt(4/493)) - pnorm(2, 4, sqrt(4/493))
+```
+
+<BR>
+<BR>
+**3d:(2 marks)** 90% of all the pages, the average number of typos per page will be **at least** how many? Do not round your answer.
+```{r}
+qnorm(0.9, 4, sqrt(4/493))
+```
+
+<BR>
+<BR>
+
+-----------------------------------------------------------
+
+**Question 4: (3 marks)**
+
+In a certain geographical region in the southwestern United States, the number of earthquakes received various from one month to the next with a mean of three earthquakes per month (assume 30 days in a month). When an earthquake does occur, the magnitude of the earthquake on the Richter scale A can be modeled by the probability density function
+
+$$
+f(a)=(\frac{1}{2.4})e^{-a/2.4},\,\,\,\,\text{for      }  a>0
+$$
+
+You are to sample at random n = 100 earthquakes that have occurred in this region in the past and observed the magnitude of each on the Richter scale. Compute the probability that **the mean magnitude** exceeds 3.5
+```{r}
+# Exponential distribution
+# P(X > 3.5)
+pdfQ4 = function(x){
+  (1/2.4)*exp(-x/2.4)
+}
+muQ4 = 2.4 # E(x) is equal to beta for exponential
+sdQ4 = 2.4/sqrt(100)
+zQ4 = (3.5 - muQ4) / sdQ4
+
+1 - pnorm(zQ4)
+
+1 - pnorm(3.5, muQ4, sdQ4)
+```
+
+
+---------------------------------------------
+
+**Question 5: (3 marks)**
+
+Billy plays purchases one 6-49 lottery ticket every week and keeps track of the number of “matches”
+he has on each of his tickets. To be clear, a ”match” will occur when a number on his ticket matches a
+number that appears in the winning combination. A random variable X that keeps track of the number
+of matching numbers Billy experiences per week has the probability distribution function with a mean and
+standard deviation of
+
+$$
+P(X=x)=\frac{\binom{6}{x}\binom{43}{6-x}}{\binom{49}{6}}\,\,\,x=0,1,2,3,4,5,6\\
+E(X)=\mu_x=\frac{36}{49}=0.7347,\,\,\,SD(X)=\sigma_x=0.7599=0.76
+$$
+
+Billy claims that in a year (52 weeks), **on average, he manages to have at least one matching number on his 6-49 ticket.** What do you think about Billy’s claim? Provide a brief commentary about Billy’s claim using
+your current knowledge of statistics and probability theory.
+```{r}
+pdfQ5 = function(x){
+  (choose(6, x)*choose(43,6-x)) / choose(49,6)
+}
+1 - pdfQ5(0)
+# P(X >= 1)
+1 - phyper(0, 6, 43, 6) # probability of a matching number per week
+# so on average in a week Billy matches one number about 56.4%. 
+# So, Billy's claim that he manages to have at least one matching number on his 6-49 ticket, on average, in a year is supported by the probability distribution function given.
+
+# This does not mean that Billy will definitely have at least one matching number in any given year, as probability is a measure of likelihood and not certainty. There is still a chance that he may not have any matches in a particular year, or he may have multiple matches in some weeks. However, over a large number of trials, we can expect the probability distribution to hold and for the average to converge towards the expected value.
+```
+
+<BR>
+<BR>
+-----------------------------------------------------------
+
+**Question 6: (14 marks)**
+
+A survey conducted by Statistics Canada in August 2018^2^  found that 80% of Canadians “will not try or increase their consumption of” cannabis once it became legal on October 17, 2018.
+<BR>
+<BR>
+
+**6a:(2 marks)** You are to randomly pick n = 1000 Canadians and determine the proportion of which will indicate that they “will not try or increase their consumption of” marijuana once its usage becomes legal. Is the statistic  $\widehat{p}$ you are using an unbiased statistic? Hint: Is $E(\hat{p}=p)$?
+```{r}
+# Yes, pHat is an unbiases statistic for p. Since E(pHat) is equal to p.
+mu6a = 0.80 # Mean of Phat is p
+mu6a
+sd6a = sqrt((0.8*(1-0.8))/1000)
+sd6a
+```
+
+<BR>
+<BR>
+
+**6b:(2 marks)**  Compute the probability that the proportion of Canadians you sample from part (a) that indicate they “will not try or increase their consumption of” marijuana is more than 75%.
+```{r}
+# P(pHat > 0.75)
+1 - pnorm(0.75, mu6a, sd6a)
+```
+
+
+**6c:(3 marks)** A different type of statistic is called the ‘plus-1/plus-2’ statistic, which is defined as
+
+$$
+\tilde{p}=\frac{X+1}{n+2}
+$$
+
+Where X follows Binomial Distribution. Is this statistic an unbiased statistic? Show all relevant work.
+$$
+E(\tilde{p}) = p \\\
+E(\tilde{p}) = E(\frac{\sum{xi}+1}{n+2}) \\\
+= \frac{1}{n+2} * [E(\sum{xi}+1)] \\\
+= \frac{1}{n+2} * [E(\sum{xi}) + E(1)] \\\
+E(\sum{xi}) \ is \ a \ binomial \\\
+= \frac{1}{n+2} * [E(x) + E(1)] \\\
+= \frac{1}{n+2} * [np + 1] \\\
+= \frac{np}{n+2} + \frac{1}{n+2} = \frac{np+1}{n+2} \neq p \\\
+\\\
+\tilde{p} \ is\ biased\ est.
+$$
+<BR>
+<BR>
+**6d:(2 marks)** Refer to part (c): Using 3000 for the number of simulations, create a distribution of the statistic $\widetilde{p}$. Present the distribution in your assignment submission, and compute the mean and standard deviation of the 3000 simulated values of $\widetilde{p}$. Hint: check Lab 4 Exercise 2e.
+```{r}
+nsims6d = 3000
+n6d = 1000
+sampleprop = numeric(nsims6d)
+for(i in 1:nsims6d)
+{   outcome = rbinom(1, n6d, 0.80)
+    sampleprop[i] = (outcome + 1)/(n6d + 2)
+}
+dfQ6d = data.frame(sampleprop)
+
+library(ggplot2)
+ggplot(data=dfQ6d, aes(x = sampleprop)) + geom_histogram(col='red', fill='blue') + xlab("Distribution of plus-1/plus-2")
+
+library(mosaic)
+favstats(~ sampleprop, data = dfQ6d)
+mean(sampleprop, data = dfQ6d) # verifying 
+sd(sampleprop, data = dfQ6d) # verifying
+```
+
+<BR>
+<BR>
+
+**6e:(3 marks)** Refer to the statistic in part (b): Repeat (d), creating a distribution of the statistic $\widehat{p}$. Present its distribution, and compute the mean and standard deviation of the 3000 simulated values of $\widehat{p}$.
+```{r}
+nsims6e = 3000
+n6e = 1000
+sampleprop = numeric(nsims6e)
+for(i in 1:nsims6e)
+{   outcome = rbinom(1, n6e, 0.80)
+    sampleprop[i] = (outcome/n6e)
+}
+dfQ6e = data.frame(sampleprop)
+
+library(ggplot2)
+ggplot(data=dfQ6e, aes(x = sampleprop)) + geom_histogram(col='red', fill='blue') + xlab("Distribution of Sample Proportion")
+
+
+library(mosaic)
+favstats(~ sampleprop, data = dfQ6e)
+mean(sampleprop, data = dfQ6e) # verifying 
+sd(sampleprop, data = dfQ6e) # verifying
+```
+
+<BR>
+<BR>
+
+**6f:(2 marks)** Refer to your findings in parts (6d) and (6e). Which statistic would you use to estimate the unknown value of p, the true proportion of Canadians who indicate they “will not try or increase their consumption of” marijuana once its usage becomes legal. Ensure you justify your answer based on your outputs. 
+```{r}
+# The statistic I would use to estimate the unknown value of p would be pHat, this is because pHat is an unbiased statistic and produces a mean that is very close to the the portion of Canadians sampled who will not try or increase cannabis consumption (80% or 0.8). 
+```
+
+
+-----------------------------------------------------------
+
+**Question 7: (6 marks)**
+
+Let $x_1, x_2, ···, x_{25}$ represent data produced from a random sample of taken from a population variable
+that can be modeled by the following probability density function
+
+$$
+f(x)=(\frac{1}{6\beta^4})x_i^3e^{\frac{-x_i}{\beta}}\,\,\,for \,\,x_i>0,\beta>0
+$$
+
+The data has been observed to be the following:
+$$
+29.5, 13.2, 21.6, 20.0, 42.9, 28.5, 26.7, 32.6, 10.0, 10.6, 11.7, 21.2, 20.4, 19.9, 29.3, 31.2, 26.4, 14.0, 40.0,12.8, 16.9, 15.2, 19.6, 34.3, 28.1
+$$
+
+**7a:(2 marks)** Compute the values of $\overline{X},\tilde{X},\,\, and\,\,\ S.$
+```{r}
+data7a = c(29.5, 13.2, 21.6, 20.0, 42.9, 28.5, 26.7, 32.6, 10.0, 10.6, 11.7, 21.2, 20.4, 19.9, 29.3, 31.2, 26.4, 14.0, 40.0,12.8, 16.9, 15.2, 19.6, 34.3, 28.1)
+mean(data7a) # X-bar
+median(data7a) # X-tilde
+sd(data7a) # S
+fav_stats(data7a)
+```
+
+<BR>
+<BR>
+**7b:(2 marks)** Consider the provided probability density function. Given that $\alpha=4$,suggest an unbiased statistic/estimator for $\beta$. 
+$$
+E(X) = E(\overline{X}) = \alpha * \beta = 4*\beta \neq \beta \\\
+\\\
+Bias(\overline{X}) = E(\overline{X}) - \beta= 4*\beta - \beta \neq \beta \\\
+\\\
+E(\frac{\overline{X}}{4}) = \frac{4*\beta}{4} = \beta \\\
+Therefore, \ \frac{\overline{X}}{4} \ is \ an \ unbiased \ statistic/estimator \ for \ \beta
+$$
+Hint: By CLT, n $\geq 25$ $E(X)=E(\bar{X})=\alpha*\beta$
+<BR>
+<BR>
+**7c:(2 marks)** Is the unbiased statistic you recommend for the estimation of $\beta$ in part (7b) a maximum likelihood statistic/estimator for $\beta$? Demonstrate your answer via a graph of the likelihood function $L(\beta|x_1,x_2,...,x_{25})$.
+```{r}
+beta7c = seq(0, max(data7a), 1)
+den7c = numeric(length(data7a))
+xvalues = seq(0, 15, 0.1)
+func7c = function(beta7c){
+  (1/((6^25) * (beta7c^{25*4})))*((prod(data7a))^3)*(exp(sum(data7a))/beta7c)
+}
+
+for(i in 1:length(xvalues))
+{
+  if (xvalues[i] < (max(data7a))/4)
+    den7c[i] = 0
+  else
+    den7c[i] = func7c(xvalues[i])
+}
+plot(xvalues, den7c, col = 'red', type = 'l', yaxt='n', ylab = 'L(beta)')
+abline(v=(max(~data7a))/4, col='purple')
+```
+
+<BR>
+<BR>
+Note: 
+
+$$
+L(\beta:x_1,x_2,...x_{25})=\frac{1}{6^{25}\beta^{25*4}}(x_1*x_2*...*x_{25})^3e^{\sum_{i=1}^{25}x_i/\beta}
+$$
+
+
+-----------------------------------------------------------
+
+
+**Question 8: (7 marks)** You are to take a random sample of $n$ data points from a population, the variable $X$ of which can be modeled by the probability density function
+
+$$
+f(x) = \frac{1}{2\theta + 1} \hspace{0.25in} \text{for} \:\: 0 \leq x\leq 2\theta + 1
+$$
+
+
+**8a:(3 marks)** Consider the sample mean, $\overline{X}$ when n is large. Is the sample mean an unbiased statistic/estimator for $\theta$? Why or why not? If it is not, compute the $Bias(\overline{X})$ and conclude if the estimator over or underestimate the unknown value of $\theta$.
+$$
+E(X) = E(\overline{X}) = \frac{(2\theta+1)+0}{2}=\frac{2\theta+1}{2}=\theta+\frac{1}{2} \neq \theta \\\
+\\\
+Bias(\overline{X}) = E(\overline{X}) - \theta= (\theta+\frac{1}{2}) - \theta = \frac{1}{2} \neq \theta \\\
+\\\
+The\ sample\ mean\ is\ a\ biased\ statistic\ as\ the\ bias\ is\ an\ overestimation\ of\ \frac{1}{2}
+$$
+<BR>
+<BR>
+**8b:(2 marks)** From your result in part (a), suggest an unbiased statistic for $\theta$. Hint: you need to modify the statistic $\overline{X}$  so that E(the new statistic $\overline{X}$ ) = $\theta$
+$$
+E(\overline{X} - \frac{1}{2}) = (\theta+\frac{1}{2}) - \frac{1}{2} = \theta \\\
+Therefore, \ (\overline{X}-\frac{1}{2}) \ is \ an \ unbiased \ statistic/estimator \ for \ \theta
+$$
+<BR>
+<BR>
+
+**8c:(2 marks)** The following data resulted from a random sample of $n = 8$:
+$$
+12.1, 7.0, 0.27, 9.0, 11.4,  9.1,  8.7, 2.2, 
+$$
+From these data, estimate the value of $\theta$ using the result from (8b).
+```{r}
+data8c = c(12.1, 7.0, 0.27, 9.0, 11.4,  9.1,  8.7, 2.2)
+theta8c=seq(0,max(data8c),1)
+den8c = numeric(length(data8c))
+xvalues = seq(0,35, 0.1)
+likeuni = function(theta8c){(1/((2*theta8c) + 1))^{8}}
+
+for(i in 1:length(xvalues))
+{
+  if (xvalues[i] < ((max(data8c)) - 1)/2)
+  den8c[i] = 0
+  else 
+    den8c[i] = likeuni(xvalues[i])
+}
+mean(data8c)-1/2
+median(data8c)-1/2
+(max(data8c)-1)/2
+
+plot(xvalues, den8c, col='red', type="l", yaxt="n", ylab="L(Beta)")
+abline(v=(max(data8c)- 1) /2, col='purple')
+```
+
+
+-----------------------------------------------------------
+
+
+**Question 9: (4 marks)** 
+
+Let $X_{1}, X_{2}, \cdots, X_{n}$ represent a random sample of data $n \geq 25$ taken from a population variable that is described by
+
+$$
+f(x) = \frac{3x^2}{\theta^3} \hspace{0.25in} \text{for}\:\: 0 \leq x \leq \theta
+$$
+
+It can be shown that
+
+$$
+E(X) = \frac{3\theta}{4} \hspace{0.5in} F(x) = \frac{x^{3}}{\theta^{3}} \:\: \text{for}\:\: 0 \leq x \leq \theta
+$$
+
+**9a:(2 marks)** Show that $\overline{X}$ is a biased statistic for $\theta$. Compute its bias. Does the estimator always underestimate or overestimate the unkown value of $\theta$?
+$$
+E(X) = E(\overline{X}) = \frac{3\theta}{4} \ne \theta \\\ Therefore,\ \overline{X}\ is\ biased \\\
+Bias(\overline{X})=E(\overline{X}) = \frac{3\theta}{4}-\theta = -\frac{3\theta}{4} \\\ \overline{X}\ is\ an\ underestimation
+$$
+
+<BR>
+<BR>
+
+**9b:(2 marks)** What is the unbiased estimator of $\theta$?
+$$
+E(\overline{X}) = \frac{3\theta}{4} \\\
+E(?*\overline{X}) = \theta \\\
+E(\overline{X} * \frac{4}{3}) = E(\frac{4}{3}\overline{X}) = \frac{4}{3}*E(\overline{X}) = \frac{4}{3}*\frac{3\theta}{4} = \theta \\\
+Therefore, \ E(\frac{4}{3}\overline{X}) \ is \ the \ unbiased \ statistic/estimator \ for \ \theta
+$$
+
+<BR>
+<BR>
+-----------------------------------------------------------
+
+
+**Question 10: (9 marks)** A common measure of toxicity for any pollutant is the concentration of the pollutant that will kill half of the test species in a given amount of time (usually about 96 hours for the fish species). This measurement is called the LC50, which refers to the lethal concentration killing 50% of the test species).
+<BR>
+<BR>
+The Environmental Protection Agency has collected data on LC50 measurements for certain chemicals likely to be found in freshwater and lakes. For a certain species of fish, the LC50 measurements (in parts per million) for DDT in 12 experiments to determine the LC50 ”dose” are
+<BR>
+<BR>
+$$
+8,5,13,11,15,12,9,5,12,4,10,7
+$$
+
+
+**10a:(2 marks)** Use R studio to create the bootstrap distribution of the sample mean X. Use 3000 re-samples in your work. What is the shape of the distribution? \
+```{r}
+library(mosaic)
+library(tidyverse)
+toxicConc = c(8,5,13,11,15,12,9,5,12,4,10,7)
+nsize10a = length(toxicConc)
+df10a = data.frame(toxicConc)
+
+boot10a = do(3000) * mean(resample(toxicConc, nsize10a, data=df10a, replace = TRUE))
+head(boot10a, 3)
+
+ggplot(data=boot10a, aes(x = mean)) + geom_histogram(col='red', fill='blue', binwidth=0.5) + xlab("Values of Bootstrap Statistic - Sample Mean") + ggtitle("Bootstrap Disribution of Sample Mean (n = 12)")
+
+# The shape of the distribution follows a normal distribution
+```
+
+<BR>
+<BR>
+
+**10b:(2 marks)** From your result in (a), compute the 95% bootstrap confidence interval for μ, the mean LC50 measurement for DDT
+```{r}
+qdata(~ mean, c(0.025, 0.975), data = boot10a)
+```
+$$
+7.25000  \ \leq \ \mu \ \leq \ 11.16667
+$$
+<BR>
+<BR>
+
+**10c:(2 marks)** Compute the 95% confidence interval for $\mu$ using the t-version of confidence interval. Ensure you appropriately present your finding/result.
+```{r}
+t.test(~ toxicConc, conf.level=0.95, data=df10a)$conf
+```
+$$
+7.013863 \ \le \ \mu \ \le \ 11.486137
+$$
+<BR>
+<BR>
+
+**10d:(3 marks)** The confidence interval you computed in part (c) is valid provided a certain condition holds. Use ggplot() to create graphs that are used to check this condition. From your plots, can you infer that this condition is satisfied? Explain
+```{r}
+ggplot(data = df10a, aes(sample = toxicConc)) + stat_qq(size=2, col='blue') + stat_qqline(col='red') + ggtitle("Normal Probability Plot of LC50 Measurement Toxicity")
+
+ggplot(data = df10a, aes(x = "var", y = toxicConc)) + geom_boxplot(col='red', fill = 'blue') + xlab("") + ylab("LC50 Measurement") + coord_flip() + ggtitle("Boxplot of LC50 Measurement Toxicity")
+
+# Since the data does produce a very rough straight line between the middle point we can assume that the data conforms to a normal probability model.
+# For the box plot the line is very slightly left-skewed but still closer to the middle so we can assume that the data does conform albeit very weakly. 
+# We can conclude that the condition is satisfied.
+```
+
+
+---------------------------------------------------------
+
+**Question 11: (8 marks)** Ipsos Reid recently reported1on a survey conducted on ”Baby-Boomer” Canadians (Canadians aged 55 or older) homeowners and found that of n= 1866 who have either downsized their home or plan to downsize their home, 571 indicates they either downsized or plan to downsize to take the equity out of their home to live comfortably in retirement.
+```{r}
+downsize = c(rep(0, 1866-571), rep(1, 571)) # Creating a vector where "0" is that the wont downsize and "1" is that they will or plan to downsize
+df11 = data.frame(downsize)
+head(df11, 3)
+tail(df11, 3)
+```
+
+<BR>
+<BR>
+
+**11a:(3 marks)** Compute a 95% Bootstrap confidence interval for p, the proportion of all Canadians aged 55 years or older homeowners who have either downsized or plan to downsize to take equity out of their home to live comfortably in retirement. Use 3000 re-samples in your work
+```{r}
+boot11 = do(3000) * mean(resample(downsize, 1866, data=df11, replace = TRUE))
+head(boot11, 4)
+
+qdata(~ mean, c(0.025, 0.975), data=boot11)
+```
+$$
+0.2856243  \ \le \ p \ \leq \ 0.3285102 
+$$
+<BR>
+<BR>
+
+**11b:(2 marks)** Similar to your work in Question 1, create the distribution of the bootstrap statistic $\widehat{p}$. What is the shape of this distribution?
+```{r}
+ggplot(data=boot11, aes(x = mean)) + geom_histogram(col='red', fill='blue', binwidth=0.01) + xlab("Values of Bootstrap Statistic - Sample Proportion") + ggtitle("Bootstrap Distribution of Sample Proportion (n = 1866)")
+# The shape follows a normal distribution curve
+```
+
+<BR>
+<BR>
+
+**11c:(3 marks)** Compute a 95% confidence interval for p, the proportion of all Canadians aged 55 years or older homeowners who have either downsized or plan to downsize to take equity out of their home to live comfortably in retirement. Use the **"Plus-2/Plus-4" or "Plus 4"** method highlighted in class.
+```{r}
+boot11c = do(3000) * sum(resample(downsize, 1866, data=df11, replace=TRUE)) # count the number of 1s in each bootstrap sample
+head(boot11c, 3)
+
+plus2plus4= (boot11c$sum+2)/(1866+4)
+boot11c2=data.frame(boot11c,boot11c$sum+2,plus2plus4)
+head(boot11c2, 3)
+
+ggplot(data=boot11c2, aes(x = plus2plus4)) + geom_histogram(col='red', fill='blue', binwidth=0.01) + xlab("Values of Bootstrap Statistic - Plus-2/Plus-4") + ggtitle("Bootstrap Distribution of Plus-2/Plus-4 Sample Proportion (new n = 1870)")
+
+qdata(~ plus2plus4, c(0.025, 0.975), data=boot11c2)
+
+library(binom)
+binom.confint(571,1866, conf.level = 0.95,method = "agresti-coull")
+```
+$$
+0.2855615  \ \le \ p \ \le \ 0.3267380
+$$
+
+<BR>
+<BR>
+
+-----------------------------------------------------------------------
+
+
+**Question 12: (8 marks)**  In this question, please refer to the studentsurvey.csv file specifically, the variable **HrsSocNet** which measures the typical number of hours a student spends in a week on social networking internet platforms. 
+
+```{r}
+studentsurvey = read.csv("http://people.ucalgary.ca/~jbstall/DataFiles/studentsurvey.csv")
+```
+
+**12a:(4 marks)** Compute a bootstrap 95% confidence interval for $\sigma_{HrsSocNet}$ which measures the typical number of hours a student spends in a week on social networking internet platforms.Interpret the meaning of your interval in the context of these data. (Use 3000 re-samples in your work and **show both Bootstrap Sampling commands provided in class**)
+<BR>
+<BR>
+```{r}
+studentsurvey = read.csv("http://people.ucalgary.ca/~jbstall/DataFiles/studentsurvey.csv")
+studentsurvey$HrsSocNet
+
+# Method 1
+ntimes = 3000
+nsize = length(studentsurvey$HrsSocNet)
+dvecmeans = numeric(ntimes)
+dvecsds = numeric(ntimes)
+origdata = studentsurvey$HrsSocNet
+for (i in 1:ntimes){
+  datavec = sample(origdata, nsize, replace = TRUE)
+  dvecmeans[i] = mean(datavec)
+  dvecsds[i] = sd(datavec)
+}
+df12a1 = data.frame(dvecmeans, dvecsds)
+head(df12a1, 3)
+
+qdata(~ dvecsds, c(0.025, 0.975), data = df12a1)
+```
+$$
+7.146664  \ \le \ \sigma \ \le \ 14.696430 
+$$
+
+```{r}
+# Method 2
+boot12a = do(3000) * sd(resample(origdata, nsize, replace = TRUE))
+head(boot12a, 3)
+
+qdata(~ sd, c(0.025, 0.975), data = boot12a)
+```
+
+$$
+7.163762  \ \le \ \sigma \ \le \ 14.669402 
+$$
+<BR>
+<BR>
+
+**12b:(4 marks)** Compute a 95% bootstrap confidence interval for $\sigma^2$ and create the distribution of the bootstrap statistic $s^2$. What is the shape of this distribution?
+```{r}
+boot12b = do(3000) * var(resample(origdata, size=nsize, replace = TRUE))
+qdata(~var, c(0.025, 0.975), data = boot12b)
+ggplot(data = boot12b, aes(x = var)) + geom_histogram(col="black", fill = "orange", binwidth = 10) + xlab("Values of X") + ggtitle("Distribution of sample Variance (n = 109)")
+# The shape of the distribution is right skewed.
+```
+$$
+51.61735  \ \le \ \sigma^{2} \ \le \ 211.83538 
+$$
+<BR>
+<BR>
+
+-----------------------------------------------------------------------------------------
+
+**Question 13: (10 marks)** Let $x_1,x_2,···,x_n$ represent a random sample taken from a shifted Exponential distribution. This particular shifted Exponential distribution has a probability density function
+
+$$
+f(x)=e^{-(x-\beta)}\:\:\:for\:\:x > \beta
+$$
+
+In many instances, $\beta$ represents the minimum lifetime.
+<BR>
+<BR>
+
+$X_{Min}$ is the maximum likelihood statistic/estimator which is not an unbiased estimator for $\beta$ as $E(X_{Min}) = \beta + \frac{1}{n}$ for $\beta$ 
+<BR>
+<BR>
+
+The following represent the lifetimes of n= 8 randomly chosen microprocessor (in 10,000s of hours) of continuous operation.
+
+$$
+0.07, 0.51, 0.44, 0.15, 0.30, 4.24, 0.90, 0.11
+$$
+
+For example, the data point 0.07 represents a microprocessor that failed at 700 hours, or had a lifetime of 700 hours.
+<BR>
+<BR>
+
+**13a:(3 marks)** From these data, create the bootstrap distribution of $X_{Min}$, the maximum likelihood statistic/estimator for $\beta$. Use 2000 as the number of re-samples. What is the shape of this distribution?
+```{r}
+microprocessors = c(0.07, 0.51, 0.44, 0.15, 0.30, 4.24, 0.90, 0.11)
+boot13a = do(2000) * min(resample(microprocessors, size=8, replace = TRUE))
+head(boot13a, 5)
+
+ggplot(data=boot13a, aes(x = min)) + geom_histogram(col='red', fill='blue', binwidth=0.01) +  xlab("Values of Xmin") + ggtitle("Distribution of Xmin")
+
+ntimes13 = 2000
+nsize13 = 8
+dvecmeans13 = numeric(ntimes13)
+dvecsds13 = numeric(ntimes13)
+xmins = numeric(ntimes13)
+for (i in 1:ntimes13){
+  datavec13 = sample(microprocessors, nsize13, replace = TRUE)
+  xmins[i] = min(datavec13)
+  dvecmeans13[i] = mean(datavec13)
+  dvecsds13[i] = sd(datavec13)
+}
+df13 = data.frame(dvecmeans13, dvecsds13, xmins)
+head(df13, 5)
+
+ggplot(data=df13, aes(x = xmins)) + geom_histogram(col='red', fill='blue', binwidth = 0.01) +  xlab("Values of Xmin") + ggtitle("Distribution of Xmin") # Verifying using both methods
+
+# The shape of the distribution is right skewed.
+```
+
+
+
+Hint!
+
+Use the following commands in the for( ) loop when creating the bootstrap samples
+
+datavec = sample(data, nsize,replace=TRUE)
+
+xmins[i] = min(datavec)
+
+
+
+**13b:(2 marks)** From your answer in part (a), find the 99% Bootstrap confidence interval for $\beta$.
+```{r}
+qdata(~ min, data = boot13a, c(0.005, 0.995))
+```
+$$
+0.0700 \ \le \ \beta \ \le \ 0.30
+$$
+<BR>
+<BR>
+
+**13c:(3 marks)** The conventional $100(1 −\alpha)%$ confidence interval for $\beta$ can be found to be
+
+$$
+ X_{Min} + \frac{ln\left( \frac{\alpha}{2} \right)}{n} \leq \beta \leq X_{Min} + \frac{ln\left( 1 - \frac{\alpha}{2} \right)}{n} \\
+$$
+
+
+From these data, 
+
+$$
+0.07, 0.51, 0.44, 0.15, 0.30, 4.24, 0.90, 0.11
+$$
+
+
+compute the conventional 99% confidence interval for $\beta$ Note: In R, use log(a) to compute ln(a)
+```{r}
+# Exponential dist so alpha = 1 and n = 8
+Xmin1 = 0.0700 + ((log(1/2))/8)
+Xmin2 = 0.3007 + ((log(1-(1/2)))/8)
+Xmin1
+Xmin2
+```
+$$
+X_{Min} + \frac{ln\left( \frac{\alpha}{2} \right)}{n} \leq \beta \leq X_{Min} + \frac{ln\left( 1 - \frac{\alpha}{2} \right)}{n} \\
+ = 0.0700 \ + \frac{ln\left( \frac{1}{2} \right)}{8} \le \ \beta \ \le \ 0.3007 + \frac{ln\left( 1 - \frac{1}{2} \right)}{8} \\
+ = -0.0166434 \ \le \ \beta \ \le \ 0.2140566
+$$
+<BR>
+<BR>
+
+**13d:(2 marks)** As mentioned above, $X_{Min}$ is the maximum likelihood statistic/estimator which is not an unbiased estimator for $\beta$ as $E(X_{Min}) = \beta + \frac{1}{n}$.for $\beta$. Suggest an unbiased statistic for $\beta$. Hint: you need to modify the statistic $X_{Min}$  so that E(the new statistic $X_{Min}$ ) = $\beta$
+$$
+Bias(X_{Min}) = E(X_{Min}) - \beta \\\
+= \beta + \frac{1}{n} - \beta \\\
+= \frac{1}{n} \\\ 
+Therefore \ X_{Min} \ is \ an \ biased \ estimator \\\ \\\
+
+E(X_{Min}*n) = E(X_{Min}) * E(n) \\\
+= (\beta + \frac{1}{n}) * n \\\
+= \beta \\\
+Therefore \ (X_{Min}*n) \ is \ an \ unbiased \ estimator \ for \ \beta
+$$
+<BR>
+<BR>
+-----------------------------------------------------------------------------------
+
+
+**Question 14: (7 marks)** Does one’s educational level influence their opinion about vaccinations? A recent Angus Reid^1 survey was taken. Each person sampled was asked to respond to the statement
+
+“The science around vaccinations isn’t clear.”
+
+Respondents either “strongly agree”, “moderately agree”,“moderately disagree”, or “strongly disagree”. The sample was partitioned by level of education. 
+<BR>
+<BR>
+There were n= 670 respondents who’s highest level of education was high school or less, of which 348 “disagreed”. There were also n= 376 who’s highest level of education was at least an undergraduate university eduction. Of these, 274 “disagreed”.
+<BR>
+<BR>
+You wish to estimate $p_{Uni} −p_{HS}$ , the difference between the proportion of all university-educated Canadians who disagree that the science of vaccinations isn’t clear and the proportion of all Canadians who’s highest level of completed education is high school who believe the same. You wish to have 95% confidence in your result
+<BR>
+<BR>
+**14a:(3 marks)** Estimate the true value of $p_{Uni} −p_{HS}$ through the bootstrap distribution of the difference between the sample proportions, $\widehat{p_{Uni}} −\widehat{p_{HS}}$. Use 3000 for the number of replications. Provide the distribution plot before creating the bootstrap confidence Interval. 
+```{r}
+uni = rep(c(0,1), c(274, 376-274))
+hs = rep(c(0,1), c(348, 670-348))
+levelOfEduc = c(rep(c("Uni"), 376), rep(c("HS"), 670))
+response = c(uni, hs)
+df14a = data.frame(levelOfEduc, response)
+head(df14a, 3)
+tail(df14a, 3)
+
+univ = filter(df14a, levelOfEduc == "Uni")
+hisch = filter(df14a, levelOfEduc == "HS")
+head(univ, 3)
+tail(hisch, 3)
+```
+```{r}
+nUni = 376
+nHs = 670
+nsims14 = 3000
+propUni = numeric(nsims14)
+propHs = numeric(nsims14)
+diffprops = numeric(nsims14)
+for (i in 1:nsims14){
+  propUni[i] = sum(sample(univ$response, nUni, replace = TRUE))/nUni
+  propHs[i] = sum(sample(hisch$response, nHs, replace = TRUE))/nHs
+  diffprops[i] = propUni[i] - propHs[i]
+}
+boot14 = data.frame(propUni, propHs, diffprops)
+head(boot14)
+
+ggplot(data=boot14, aes(x = diffprops)) + geom_histogram(fill='blue', col='red', binwidth=0.02) + xlab("Distribution of Difference SamPer(Uni) - SamPer(HS)") + ggtitle("Distribution of Bootstrap Statistic: Difference Between Sample Proportions")
+
+qdata(~diffprops, c(0.025, 0.975), data = boot14)
+```
+$$
+-0.2677789 \ \le \ p_{Uni}−p_{HS} \le \ -0.1483340 
+$$
+<BR>
+<BR>
+
+**14b:(2 marks)** Repeat the aim of part (a) using the conventional method "the plus-1/plus-2" of computing the confidence interval for $p_{Uni} - p_{HS}$ .
+```{r}
+prop.test(c(348+1,274+1), c(670+2, 376+2), conf.level = 0.95, correct=FALSE)
+```
+$$
+0.5193452  \ \le \ p_{Uni}−p_{HS} \le \ 0.7275132
+$$
+<BR>
+<BR>
+
+**14c:(2 marks)** Referring to your answer in part (a) and (b), can you infer that the proportion of proportion of all university-educated Canadians who disagree that the science of vaccinations isn’t clear is the same as the proportion of all Canadians who’s highest level of completed education is high school? Why?
+```{r}
+library(binom)
+binom.confint(274,376, method="agresti-coull")
+binom.confint(348,670, method="agresti-coull")
+
+# No, there is a large difference in the lower and upper bound of the University educated Canadians and the High school ones. Same with the means, an average of about 73% of university educated Canadians disagree that the science of vaccinations is unclear. While only about an mean of 52% of high school educated Canadians disagree that the science of vaccinations is unclear.
+```
+
+<BR>
+<BR>
+
+----------------------------------------------------------------
+
+**Question 15: (10 marks)**  Health Canada sets an action level for mercury in fish at 1 ppm (part per million). If mercury levels are higher than this value, then this value in commercial fish then Health Canada will take action to impose a moratorium on fishing in the area where the fish are harvested. Recently, there have been concerns about mercury levels in walleye fish populating the portion of the Athabaska River that is down stream from Whitecourt, where local First Nations harvest walleye as part of a commercial fishing operation. 
+<BR>
+<BR>
+A biologist randomly picked $n = 31$ walleye in a from a recent commercial fishing catch downstream from Whitecourt, and measured the mercury (in ppm) from each walleye. The ppms, are provided below
+
+$$
+1.2,1.1,1.0,1.0,1.1,1.0,1.0,1.0,0.9,1.1,1.1,1.2,1.0,1.1,1.0,1.1,1.0,0.9,1.0,1.0,1.1,1.0,1.0,1.1,1.2,1.0,1.1,1.0,1.0,1.2,1.1
+$$
+
+**15a:(2 marks)** Establish a statistical hypothesis that allows the biologist to see if mercury levels in walleye fish harvested from the Athabaska River (downstream of Whitecourt) **exceed Heath Canadas action level.**
+$$
+H_o: \mu_{mercury \ level} \leq 1_{ppm} \\\
+H_a: \mu_{mercury \ level} > 1_{ppm}
+$$
+<BR>
+<BR>
+
+
+**15b:(2 marks)** Refer to your hypotheses in (a). In the context of your statistical hypotheses in part (a), explain when a Type I Error and a Type II Error for this hypothesis testing would occur. 
+```{r}
+# A Type I Error would occur if the biologist rejects the H0 when it is actually true, leading to the conclusion that mercury levels in the walleye exceed the action level when they do not. A Type II Error would occur if the biologist fails to reject the H0 when it is actually false, leading to the conclusion that mercury levels in the walleye do not exceed the action level when they actually do.
+```
+
+<BR>
+<BR>
+
+
+**15c:(2 marks)** Visualize these data with a boxplot, and comment on the distribution of mercury levels on walleye harvested from the Athabasca River downstream of Whitecourt. Does the condition hold?
+```{r}
+mercLvls = c(1.2,1.1,1.0,1.0,1.1,1.0,1.0,1.0,0.9,1.1,1.1,1.2,1.0,1.1,1.0,1.1,1.0,0.9,1.0,1.0,1.1,1.0,1.0,1.1,1.2,1.0,1.1,1.0,1.0,1.2,1.1)
+merc.df = data.frame(mercLvls)
+ggplot(data=merc.df, aes(x = "var", y = mercLvls)) + geom_boxplot(col='red', fill='blue') + xlab("") + ylab("Mercury(ppm)") + scale_x_discrete(breaks=NULL) + coord_flip() + ggtitle("Mercury Levels in Walleye from Athabasca River")
+
+
+# The distribution is not normal however since the n = 31 we can assume by CLT that it is approx. normal. So the condition holds.
+```
+
+<BR>
+<BR>
+
+
+**15d:(1 mark)** From the result in part (c), can we use `t.test( )` command for your finding?
+```{r}
+# Yes we can use t.test
+t.test(mercLvls, mu=1, alternative = "greater")
+```
+
+<BR>
+<BR>
+
+
+**15e:(3 marks)** Do these data suggest that Health Canada should place a moratorium on commercial walleye fishing on the Athabasca River downstream of Whitecourt? Using the `t.test( )` command. In your finding, use the `pt( )` command to verify the p-value from the `t.test ( )` command and interpret the meaning of the P -value you have computed. If you reject the null hypothesis, provide a 95% confidence interval (two.sided) for the mean mercury (in ppm) of walleye found downstream from Whitecourt. 
+```{r}
+# Since the p-value from the t-test is very small (p < 0.001) and is less then the alpha (significance level), indicating we reject the H0 and in favor of the Ha that the mean mercury level in walleye fish harvested from the Athabasca River exceeds 1 ppm. This suggests that Health Canada should consider placing a moratorium on commercial walleye fishing in this area.
+
+1 - pt(3.5425, 30) # Same as the t.test performed above
+t.test(mercLvls, mu=1, alternative="two.sided", conf.level=0.95)$conf
+```
+
+<BR>
+<BR>
+
+-----------------------------------------------------------------

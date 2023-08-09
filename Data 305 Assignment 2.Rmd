@@ -1,0 +1,434 @@
+---
+title: "Data 305 Assignment 2"
+author: "Muhammad Maqsood"
+output:
+  html_notebook: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+## Random Variables and Specific Types of Discrete Probability Models
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 1:(8 marks)** A random variable X has a probability distribution function:
+
+$$
+P(X=x)=c(0.40)^x\,\,\,\,x=1,2,3
+$$
+
+**1a:(3 marks)**Find the value of c.
+$$
+P(X=x)=c(0.40)^x \\
+\sum P(X=x) = 1 \\
+\sum c(0.40)^x = 1 \\
+c \sum (0.40)^x = 1 \\
+c \frac{0.40}{1 - 0.40} = 1 \\
+c \frac{0.40}{0.60} = 1 ;\,\,\ c \frac{2}{3} = 1 \\
+c = \frac{3}{2} = 1.5 \\
+therefore; \\
+P(X=x) = 1.5*(0.4)^x
+$$
+
+
+**1b:(2 marks)**In R Studio, create the probability distribution of X with the P(X = x) on the Y -axis, and the various values of X on the X-axis. Locate where you think the expected value of this random variable will be.
+```{r}
+x1b = 1:3
+probdist1b = function(x){
+  1.5*(0.4^x)
+}
+
+plot(x1b, probdist1b(x1b), xlab = "Value of X", ylab = "P(X=x)", main = "Prob distribution of X", type = "h", col = "blue")
+abline(v = 1.5, col = "red")
+```
+
+**1c:(1 marks)** Compute P(X>2)
+```{r}
+# P(X>2) is just 3 since x is 1,2,3
+probdist1b(3)
+```
+
+**1d:(2 marks)** Compute both $E(X) = μ_X\,\,\ \text{and}\,\,\ SD(X) = σ_X$ , with R Studio.
+```{r}
+evx = sum(x1b*probdist1b(x1b)) #computes E(X)
+evx
+m2 = sum((x1b^2)*probdist1b(x1b)) #computes E(X^2)
+varx = m2 - ((evx)^2)  #computes Var(x)
+varx 
+sdx = sqrt(varx) #computes SD(X)
+sdx  
+```
+
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+
+**Question 2:(7 marks)** It has been estimated that 90% of the world's large co-operations are actively involved in data warehousing. A random sample of 1000 large co-operations were chosen. Let X be the number of large co-operations are actively involved in data warehousing.
+
+**2a:(2 marks)** Use RStudio to compute the probability that 900 of them are actively involved in data warehousing.
+```{r}
+dbinom(900,1000,0.9) # P(X=900)
+```
+**2b:(2 marks)** Use RStudio to compute the probability that between 890 to 920 of them (inclusive) are actively involved in data warehousing.
+```{r}
+# P(890 <= X <= 920)
+sum(dbinom(890:920,1000,0.9)) # Method 1
+pbinom(920,1000,0.9) - pbinom(889,1000,0.9) # Method 2
+```
+
+**2c:(3 marks)** Create the probability distribution of X in RStudio with P(X=x) on the Y-axis and the values of X on the X-axis. 
+```{r}
+x2c = 0:1000
+probdist2c = function(x){
+  choose(1000,x)*(0.9)^{x}*(0.1)^{1000-x}
+}
+plot(x2c, probdist2c(x2c), xlab = "Value of X", ylab = "P(X=x)", main = "Prob distribution of X", type = "h", col = "blue")
+```
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 3:(9 marks)** Would you rather take a multiple choice or a full recall test? If you have absolutely no knowledge of the material. However, If you are given six choices for each question. Let X be the outcome of this multiple choice exam.
+
+
+**3a:(2 marks)**	Identify the distribution of X.
+```{r}
+# Bernoulli distribution
+P(X=x) = (1/6)^{x}(5/6)^{1-x}
+```
+$$
+P(X=x) = \frac{1}{6}^{x}*\frac{5}{6}^{1-x} \, \, \, x = 0,1
+$$
+
+**3b:(2 marks)**	If a multiple-choice exam contains 100 questions, each with six answers. Let Y be the number of correct answers. Identify the distribution of Y.
+```{r}
+# Binomial Distribution 
+P(Y=y) = choose(100,y)*(1/6)^{y}*(5/6)^{100-y}
+```
+$$
+P(Y=y) = \binom{100}{y}*\frac{1}{6}^{y}*\frac{5}{6}^{100-y}
+$$
+
+**3c:(3 marks)**	From part b, what is the expected score and the standard deviation for a student who is guessing on each question? 
+```{r}
+evx3c = 100*(1/6)
+evx3c
+sdx3c = sqrt(100*(1/6)*(5/6))
+sdx3c
+```
+
+**3d:(2 marks)**	Compute the probability that the 80-th question randomly chosen is the 15-th correct answer.
+```{r}
+dnbinom(65,15,(1/6)) # computes probability of 15th correct answer, meaning 65 wrong answers, P(B=80)
+```
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+
+**Question 4:(7 marks)** The Lady Tasting Tea is one of the most famous experiments in the founding history of statistics. In his 1935 book The Design of Experiments (1935), Sir Ronald A. Fisher writes,
+
+A Lady declares that by tasting a cup of tea made with milk she can discriminate whether the milk or the tea infusion was first added to the cup. We will consider the problem of designing an experiment by means of which this assertion can be tested ...Our experiment consists in mixing eight cups of tea, four in one way and four in the other, and presenting them to the subject for judgment in a random order. ...Her task is to divide the 8 cups into two sets of 4, agreeing, if possible, with the treatments received.
+
+Consider such an experiment. Four cups are poured milk first and four cups are poured tea first and presented to a friend for tasting. Let X be the number of milk-first cups that your friend correctly identifies as milk-first.
+
+**4a:(2 marks)**	Identify the distribution of X and the probability distribution function of X.
+```{r}
+# Hypergeometric distribution
+x4a = 0:4
+probx4a = (choose(4,x)*choose(4,(4-x)))/(choose(8,4))
+probx4a
+```
+
+$$
+P(X=x) = \frac{\binom{4}{x}*\binom{4}{4-x}}{\binom{8}{4}} \, \, \, ; x = 0,1,2,3,4
+$$
+
+
+**4b:(3 marks)** Create the probability distribution of X in RStudio with P(X=x) on the Y-axis and the values of X on the X-axis. Describe the shape of the distribution.
+```{r}
+x4b = 0:4
+probdist4b = function(x){
+  (choose(4,x)*choose(4,(4-x)))/(choose(8,4))
+}
+plot(x4b, probdist4b(x4b), xlab = "Value of X", ylab = "P(X=x)", main = "Prob distribution of X", type = "h", col = "blue")
+# The shape of the distribution follows a normal probability distribution curve (bell-shaped), meaning the distribution is symmetrical from the mean.
+```
+
+**4c:(2 marks)**	What is the probability they would correctly identify all four cups correctly, Use R command ?
+```{r}
+dhyper(4,4,4,4) # probability that the individual would identify all 4 cups correctly
+probdist4b(4) # function verifies answer
+```
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 5:(10 marks)** A survey was sent out asking the university of Calgary community to anonymously share vaccination status and concerns with returning to campus.The survey reveals a high level of vaccination among students which shows that 84.8% of students are fully vaccinated before the start of Fall 2021 semester. Suppose you were to randomly pick $n$ UofC students.
+
+Compute the probability that 
+
+**5a:(2 marks)** Out of 50 UofC students randomly sampled, at least 45 students are fully vaccinated.
+```{r}
+# Binomial Distribution
+probAtleast45 = 1 - pbinom(44,50,0.848)
+probAtleast45
+sum(dbinom(45:50,50,0.848)) # Method 2
+```
+
+
+**5b:(2 marks)** the twenty-first UofC student sampled is the eighteenth student who is fully vaccinated.
+```{r}
+dnbinom(3,18,0.848)
+```
+
+
+**5c:(2 marks)** the fifth UofC student sampled is the first student who is fully vaccinated.
+```{r}
+dgeom(5-1,0.848)
+```
+**5d:(2 marks)**it takes at least 3 UofC students to observe the first fully vacinnated student.
+```{r}
+probatleast3 = 1 - pgeom(2-1,0.848)
+probatleast3
+```
+
+**5e:(2 marks)** Out of 50 UofC students,on average, how many students are **NOT fully vaccinated**? DO not round your answer.
+```{r}
+# Expected value of a binomial distribution 
+evx5e = 50*(1-0.848)
+evx5e
+```
+
+
+**Reference**  https://ucalgary.ca/news/results-campus-survey-covid-19
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+
+**Question 6:(8 marks)** A fisherman catches, on average, three fish in an hour. Let Y be the number of fish caught in one hour. Compute the probability that this fisherman
+
+**6a:(2 marks)**Generate a visualization of the probability distribution of X. Describe the shape of the distribution.
+```{r}
+# Poisson Distribution
+x6a = 0:50
+probx6a = dpois(x6a,3)
+plot(x6a, probx6a, xlab = "Value of X", ylab = "P(X=x)", main = "Prob distribution of Poisson", type = "h", col = "blue") # generates a right skewed graph of a poisson distribution
+
+```
+
+
+**6b:(2 marks)** Compute the probability that this fisherman will catch more than 6 fish in one hour.
+```{r}
+probMorethan6 = 1 - ppois(6,3)
+probMorethan6
+```
+
+**6c:(2 marks)** Compute the probability that this fisherman will catch at most 4 fish in one hour.
+```{r}
+ppois(4,3)
+```
+
+
+**6d:(2 marks)** Compute the probability that this fisherman will catch at least 9 fish in three hours.
+```{r}
+newLambda = 3*3
+newLambda
+probAtleast9 = 1 - ppois(8,9)
+probAtleast9
+```
+
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 7:(6 marks)** A country has a ratio between male and female births of 1.05 which means that 51.22% of babies born are male.
+
+
+**7a:(2 marks)** Let X be the number of births until the first girl was born. What is the distribution of X?
+```{r}
+# Geometric Distribution
+```
+$$
+P(C =c) = (0.4878)^{c-1}*(0.5122)^{1}
+$$
+
+**7b:(2 marks)** What is the probability that a mother would have three births until the first girl was born?
+```{r}
+# Geometric Distribution
+dgeom(3-1,0.4878)
+```
+
+
+**7c:(2 marks)** What is the probability that a mother would take more than three births until the first girl was born?
+```{r}
+# Geometric Distribution
+probMorethan3 = 1 - pgeom(7-1, 0.4878)
+probMorethan3
+```
+
+<div style="margin-bottom:50px;">
+</div>
+
+
+**Question 8:(8 marks)** According to the mortgage Bankers Association in Canada, as of July 2021,the mortgage arrears payment rate on home mortgages in Alberta is 0.49% . Assuming that this rate is applicable to a community where 2,000 homes have mortgages. Let X be the number of mortgage in arrears in this community.
+
+Source: https://cba.ca/mortgages-in-arrears
+
+
+**8a:(2 marks)** What is the probability that 10 home mortgages are in arrears?
+```{r}
+# Binomial Distribution
+dbinom(10,2000, 0.0049)
+```
+
+**8b:(2 marks)** On average, how many home mortgages are in arrears? (Do not round your answer)
+```{r}
+evx8b = 2000*0.0049
+evx8b
+```
+
+**8c:(2 marks)** What is the probability that 10 home mortgages are in arrears? Use the Poisson approximation to the binomial distribution for your calculation. 
+```{r}
+# Poisson distribution
+dpois(10,0.0049)
+```
+
+**8d:(2 marks)** Comparing the result from part a and c, what can you conclude?
+```{r}
+# We can conclude that the probability of 10 home mortgages in arrears can drastically differ if the number of homes that have mortgages, as Binomial takes into account the 2000 homes that do (a finite sample size). Whilst the poisson distribution assumes a infinite sample of home mortgages within a certain area or time frame. Thus, the probability is very very small for poisson versus the binomial distribution.
+```
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 9:(2 marks)** People whose blood type is O-negative are universal donors—anyone can receive a blood transfusion of O-negative blood. In the U.S., 7.2% of the people have O-negative blood. A blood donor clinic wants to find 10 O-negative individuals. In repeated screening, what is the chance of finding such individuals among the first 100 people screened?
+```{r}
+# Negative Binomial Distribution
+dnbinom(90,10,0.072) # computes probability 10 people being O- blood type in 100 people screened, P(B = 10)
+```
+
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 10:(8 marks)** An automobile dealership has gone into receivership and an auction house has been hired to liquidate
+stock. The auction house has developed a pricing strategy to quickly sell all the vehicles on the car-lot.This pricing strategy states that “every vehicle sold will be sold at a price which is 25% off the price of the previously sold vehicle.”
+
+For example, if the first vehicle has a selling price of at 1000.00, it will sell for 750.00, the next at $562.50, etc..
+
+
+The initial selling price at the start of the day - the price of the first vehicle on sale - is $40,000. If the number of customers who purchase vehicles over the course of a day do so corresponding to a Poisson process
+with a mean of 5.2.
+
+
+**10a:(2 marks)** Compute the probability that between 3 and 6 customers, inclusive, purchase a vehicle on this day.
+```{r}
+# Poisson dist
+sum(dpois(3:6,5.2)) # P(3<=X<=6)
+```
+
+**10b:(3 marks)**  Use R/R Studio to compute the expected selling price of the next car to be sold at the days end.(Hint: You will have to create a function that computed the selling price, then compute the expected value of this function.)
+```{r}
+sellingPrice = function(x){
+  40000*(0.75^{x})
+}
+
+x10b = 0:10000
+probx10b = dpois(x10b,5.2)
+evx10b = sum(sellingPrice(x10b)*probx10b)
+evx10b
+```
+
+
+**10c:(3 marks)**Use R/R Studio to compute the standard deviation of price of the next car to be sold at the days
+end. Ensure you show all code.
+```{r}
+price2nd = sum(((sellingPrice(x10b))^2) * probx10b)
+sdx10c = sqrt(price2nd - (evx10b)^2)
+sdx10c
+```
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Question 11:(5 marks)**In a certain 500-level Statistics course, the length of time it takes a student to complete a one-hour exam,or X, varies from one student to the next. The variation in time to complete the one-hour exam can be modeled by the probability density function
+
+$$
+\begin{aligned}
+&f(x)= \frac{3}{2}x^2+x,\,\,\,\,0\leq x \leq 1\\
+\end{aligned}
+$$
+The cumulative probability density function of X is also provided
+
+$$
+\begin{aligned}
+&F(x)= \frac{x^2}{2}(x+1),\,\,\,\,0\leq x \leq 1\\
+\end{aligned}
+$$
+
+
+**11a:(5 marks)**Using R Studio, graph both f(x) and F(x) (use par(mfrow=c(1,2)). Explain the difference between these two functions.
+```{r}
+pdfQ11 = function(x){
+  ((3/2)*(x^2)) + x
+}
+cdfQ11 = function(x){
+  (((x^2)/2)*(x+1))
+}
+par(mfrow=c(1,2))
+curve(pdfQ11, 0, 1, xlab="Values of X", ylab="f(x) = Density of X", main="Distribution of X", col="blue")
+curve(cdfQ11(x), 0, 1, xlab="Values of X", ylab="CDF", main="Plot of Cumulative Distribution", col="red")
+
+# The Difference here is that the cumulative distribution is looking at the probability that a value will take equal to or less than a given value, whereas the probability density function looks at the probability of a continuous outcome. 
+```
+
+**11b:(5 marks)**Using any means available to you, compute the probability that a student finishes their exam in less
+than half an hour.
+```{r}
+integrate(pdfQ11, upper = 0.5, lower = 0)$value
+cdfQ11(0.5)
+```
+
+**11c:(5 marks)**It it takes the student at least 40 minutes to complete the exam, compute the probability that it takes
+the student at least 50 minutes to complete the exam.
+```{r}
+integrate(pdfQ11, lower = (2/3), upper = (5/6))$value
+```
+
+**11d:(5 mark)**Suppose you are a student in this course. How long can you expect it to take you to complete the one-hour exam? Compute the standard deviation as well.
+```{r}
+evQ11 = function(x){
+  (x*((3/2)*(x^2)) + x)
+}
+evx11d = integrate(evQ11, lower=0, upper = 1)$value
+evx11d # On average it will take approximately 52.5 min
+
+m2Q11 = function(x){
+  (x^2*((3/2)*(x^2)) + x)
+}
+m2 = integrate(m2Q11, lower = 0, upper = 1)$value
+sdx11d = sqrt(m2 - evx11d^{2})
+sdx11d # SD(X) is approx. 11.12 min
+```
+
+
+
+<div style="margin-bottom:50px;">
+</div>
+
+**Reference** 
+-William Mendenhall,Robert Beaver,Barbara BEaver, S. Ahmed,  Introduction to Probability and Statistics,Nelson
